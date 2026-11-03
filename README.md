@@ -9,7 +9,7 @@
 <div align='center'>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![GitHub](https://img.shields.io/badge/source-GitHub-black.svg)](https://github.com/IkyZanx/Baileys)
+[![GitHub](https://img.shields.io/badge/source-GitHub-black.svg)](https://github.com/ikyerza/baileys)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](package.json)
 
 A WebSockets library for interacting with WhatsApp Web, maintained under the **Iky Baileys** brand.
@@ -22,13 +22,13 @@ This project is a fork built on top of [Baileys](https://github.com/WhiskeySocke
 ## Installation
 Install directly from GitHub (not published on npm registry):
 ```bash
-npm install github:IkyZanx/Baileys
+npm install github:ikyerza/baileys
 ```
 
 Or add it to your `package.json` manually:
 ```json
 "dependencies": {
-  "@ikyzanx/baileys": "github:IkyZanx/Baileys"
+  "@ikyerza/baileys": "github:ikyerza/baileys"
 }
 ```
 
@@ -37,7 +37,7 @@ Already have a bot built on the original `@whiskeysockets/baileys` and don't wan
 name points to this fork:
 ```json
 "dependencies": {
-  "@whiskeysockets/baileys": "github:IkyZanx/Baileys"
+  "@whiskeysockets/baileys": "github:ikyerza/baileys"
 }
 ```
 With this alias, keep using `require('@whiskeysockets/baileys')` in your code as-is — npm will
@@ -45,7 +45,7 @@ resolve it to this fork under the hood.
 
 You can also pin to a specific branch or commit:
 ```bash
-npm install github:IkyZanx/Baileys#main
+npm install github:ikyerza/baileys#main
 ```
 
 ## Import
@@ -53,7 +53,7 @@ npm install github:IkyZanx/Baileys#main
 const {
   default: makeWASocket,
   // other exports
-} = require('@ikyzanx/baileys');
+} = require('@ikyerza/baileys');
 ```
 
 ---
@@ -65,10 +65,10 @@ const {
 const {
   default: makeWASocket,
   Browsers
-} = require('@ikyzanx/baileys');
+} = require('@ikyerza/baileys');
 
 const client = makeWASocket({
-  browser: Browsers.ikyzanx('Chrome'),
+  browser: Browsers.ikyerza('Chrome'),
   printQRInTerminal: true
 });
 ```
@@ -79,10 +79,10 @@ const {
   default: makeWASocket,
   fetchLatestWAWebVersion,
   Browsers
-} = require('@ikyzanx/baileys');
+} = require('@ikyerza/baileys');
 
 const client = makeWASocket({
-  browser: Browsers.ikyzanx('Chrome'),
+  browser: Browsers.ikyerza('Chrome'),
   printQRInTerminal: false,
   version: await fetchLatestWAWebVersion(),
   aiLabel: false // set true to show an AI label on messages sent by the bot
@@ -100,7 +100,7 @@ console.log("Your pairing code: " + code);
 const {
   default: makeWASocket,
   makeInMemoryStore
-} = require('@ikyzanx/baileys');
+} = require('@ikyerza/baileys');
 const pino = require('pino');
 
 const store = makeInMemoryStore({
@@ -134,21 +134,21 @@ logged into the same account). It does not affect delivery to the recipient.
 ```javascript
 // Sent to the recipient, but NOT synced to your other devices
 await client.relayMessage(m.chat, {
-  conversation: "Hello from IkyZanx"
+  conversation: "Hello from ikyerza"
 }, {
   noSelfSync: true
 });
 
 // Sent to the recipient AND synced to your other devices (default behavior)
 await client.relayMessage(m.chat, {
-  conversation: "Hello from IkyZanx"
+  conversation: "Hello from ikyerza"
 }, {
   noSelfSync: false
 });
 
 // Also works through sendMessage
 await client.sendMessage(m.chat, {
-  text: "Hello from IkyZanx"
+  text: "Hello from ikyerza"
 }, {
   noSelfSync: true
 });
@@ -391,7 +391,7 @@ await client.statusMention(m.chat, {
 
 # Credits
 
-IkyZanx is a fork of [Baileys](https://github.com/WhiskeySockets/Baileys), originally created by
+ikyerza is a fork of [Baileys](https://github.com/WhiskeySockets/Baileys), originally created by
 [Adhiraj Singh](https://github.com/adiwajshing) and maintained by the WhiskeySockets community.
 All credit for the underlying protocol implementation goes to the original authors and contributors.
 See [LICENSE](LICENSE) for the full license text and copyright notices.

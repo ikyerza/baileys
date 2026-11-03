@@ -1,5 +1,5 @@
 {
-  "name": "@ikyzanx/baileys",
+  "name": "@ikyerza/baileys",
   "type": "module",
   "version": "1.0.0",
   "description": "A WebSockets library for interacting with WhatsApp Web \u2014 iky fork of Baileys",
@@ -12,10 +12,10 @@
     "wa-bot",
     "whatsapp bot"
   ],
-  "homepage": "https://github.com/IkyZanx/Baileys",
+  "homepage": "https://github.com/ikyerza/baileys",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/IkyZanx/Baileys.git"
+    "url": "git+https://github.com/ikyerza/baileys.git"
   },
   "license": "MIT",
   "author": "Iky",
@@ -140,7 +140,7 @@
     "node": ">=20.0.0"
   },
   "bugs": {
-    "url": "https://github.com/IkyZanx/Baileys/issues"
+    "url": "https://github.com/ikyerza/baileys/issues"
   },
   "contributors": [
     "WhiskeySockets (original Baileys authors)"
