@@ -1,406 +1,171 @@
-# <div align='center'>Iky Baileys</div>
+# @ikyerza/baileys
 
-<p align="center">
+Library WhatsApp Web API berbasis WebSocket untuk Node.js. Paket ini adalah versi modifikasi (fork) dari [Baileys](https://github.com/WhiskeySockets/Baileys), dibuat untuk kebutuhan bot WhatsApp.
 
-  <img src="https://files.catbox.moe/2jex1b.jpg" width="180" alt="Pou"/>
+> **Catatan:** Proyek ini tidak berafiliasi dengan WhatsApp atau Meta. Gunakan dengan bijak dan patuhi Ketentuan Layanan WhatsApp. Penggunaan untuk spam atau aktivitas melanggar aturan bisa membuat nomor diblokir.
 
-</p>
+## Instalasi
 
-<div align='center'>
+```bash
+npm install @ikyerza/baileys
+```
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![GitHub](https://img.shields.io/badge/source-GitHub-black.svg)](https://github.com/ikyerza/baileys)
-[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](package.json)
+Atau pasang langsung dari GitHub:
 
-A WebSockets library for interacting with WhatsApp Web, maintained under the **Iky Baileys** brand.
-This project is a fork built on top of [Baileys](https://github.com/WhiskeySockets/Baileys) by WhiskeySockets.
-
-</div>
-
----
-
-## Installation
-Install directly from GitHub (not published on npm registry):
 ```bash
 npm install github:ikyerza/baileys
 ```
 
-Or add it to your `package.json` manually:
+Untuk memakai di bot yang sudah ada, ganti dependency `@whiskeysockets/baileys` di `package.json`:
+
 ```json
 "dependencies": {
-  "@ikyerza/baileys": "github:ikyerza/baileys"
+  "@whiskeysockets/baileys": "npm:@ikyerza/baileys"
 }
 ```
 
-Already have a bot built on the original `@whiskeysockets/baileys` and don't want to change every
-`require`/`import` in your codebase? Alias the dependency name instead, so the original package
-name points to this fork:
-```json
-"dependencies": {
-  "@whiskeysockets/baileys": "github:ikyerza/baileys"
-}
-```
-With this alias, keep using `require('@whiskeysockets/baileys')` in your code as-is — npm will
-resolve it to this fork under the hood.
+Lalu jalankan `npm install` ulang.
 
-You can also pin to a specific branch or commit:
-```bash
-npm install github:ikyerza/baileys#main
-```
+## Persyaratan
 
-## Import
-```javascript
+- Node.js 18 atau lebih baru
+- Akun WhatsApp aktif
+
+## Contoh Penggunaan
+
+### Koneksi dengan Pairing Code
+
+```js
 const {
   default: makeWASocket,
-  // other exports
-} = require('@ikyerza/baileys');
-```
+  useMultiFileAuthState,
+  DisconnectReason
+} = require('@ikyerza/baileys')
 
----
+async function start() {
+  const { state, saveCreds } = await useMultiFileAuthState('session')
 
-# Connecting To WhatsApp
+  const sock = makeWASocket({
+    auth: state,
+    printQRInTerminal: false
+  })
 
-## With QR Code
-```javascript
-const {
-  default: makeWASocket,
-  Browsers
-} = require('@ikyerza/baileys');
-
-const client = makeWASocket({
-  browser: Browsers.ikyerza('Chrome'),
-  printQRInTerminal: true
-});
-```
-
-## Connect With Pairing Code
-```javascript
-const {
-  default: makeWASocket,
-  fetchLatestWAWebVersion,
-  Browsers
-} = require('@ikyerza/baileys');
-
-const client = makeWASocket({
-  browser: Browsers.ikyerza('Chrome'),
-  printQRInTerminal: false,
-  version: await fetchLatestWAWebVersion(),
-  aiLabel: false // set true to show an AI label on messages sent by the bot
-  // other options
-});
-
-const number = "628XXXXXXXXXX";
-const code = await client.requestPairingCode(number.trim()); // or (number, "YYYYYYYY") for a custom pairing code
-
-console.log("Your pairing code: " + code);
-```
-
-# Storing Data
-```javascript
-const {
-  default: makeWASocket,
-  makeInMemoryStore
-} = require('@ikyerza/baileys');
-const pino = require('pino');
-
-const store = makeInMemoryStore({
-  logger: pino().child({ level: 'silent', stream: 'store' })
-});
-const client = makeWASocket({
-  // options
-});
-store.bind(client.ev);
-
-client.ev.on('contacts.upsert', () => {
-  console.log('New contact: ' + Object.values(store.contacts()));
-});
-```
-
-# Sending Messages
-
-## Send / relay a message with `noSelfSync`
-
-`noSelfSync` is a `relayMessage` option (private/1-on-1 chats only) that controls whether the
-message is also synced to your **other own linked devices** (other phones/WhatsApp Web sessions
-logged into the same account). It does not affect delivery to the recipient.
-
-- **`noSelfSync: true`** — the message is sent to the recipient as normal, but is **not** synced
-  to your other own devices. Useful when you don't want a message to show up on your other
-  linked sessions (e.g. silent/automated sends from a bot account).
-- **`noSelfSync: false`** (default) — normal behavior. The message is sent to the recipient and
-  also synced to your other own devices, so it appears everywhere you're logged in, just like
-  sending from the official WhatsApp app.
-
-```javascript
-// Sent to the recipient, but NOT synced to your other devices
-await client.relayMessage(m.chat, {
-  conversation: "Hello from ikyerza"
-}, {
-  noSelfSync: true
-});
-
-// Sent to the recipient AND synced to your other devices (default behavior)
-await client.relayMessage(m.chat, {
-  conversation: "Hello from ikyerza"
-}, {
-  noSelfSync: false
-});
-
-// Also works through sendMessage
-await client.sendMessage(m.chat, {
-  text: "Hello from ikyerza"
-}, {
-  noSelfSync: true
-});
-```
-
-## Send an orderMessage
-```javascript
-const fs = require('fs');
-const thumbnail = fs.readFileSync('./pouthumb.jpg');
-
-await client.sendMessage(m.chat, {
-  thumbnail,
-  message: "Order summary",
-  orderTitle: "My Store",
-  totalAmount1000: 72502,
-  totalCurrencyCode: "IDR"
-}, { quoted: m });
-```
-
-## Send a pollResultSnapshotMessage
-```javascript
-await client.sendMessage(m.chat, {
-  pollResultMessage: {
-    name: "My Poll",
-    options: [
-      { optionName: "Option 1" },
-      { optionName: "Option 2" }
-    ],
-    newsletter: {
-      newsletterName: "0X8 - Society",
-      newsletterJid: "120363424944937940@newsletter"
-    }
+  // Minta pairing code jika belum login
+  if (!sock.authState.creds.registered) {
+    const nomor = '628xxxxxxxxxx' // nomor dengan kode negara, tanpa + atau spasi
+    const code = await sock.requestPairingCode(nomor)
+    console.log('Pairing code:', code)
   }
-});
-```
 
-## Send a productMessage
-```javascript
-await client.relayMessage(m.chat, {
-  productMessage: {
-    title: "Product.pdf",
-    description: "Product description",
-    thumbnail: { url: "./pouthumb.jpg" },
-    productId: "EXAMPLE_TOKEN",
-    retailerId: "EXAMPLE_RETAILER_ID",
-    url: "https://example.com",
-    body: "Body text",
-    footer: "Footer",
-    buttons: [
-      {
-        name: "cta_url",
-        buttonParamsJson: "{\"display_text\":\"Visit\",\"url\":\"https://example.com\"}"
-      }
-    ],
-    priceAmount1000: 72502,
-    currencyCode: "IDR"
-  }
-});
-```
+  sock.ev.on('creds.update', saveCreds)
 
-## Send an interactiveMessage
-```javascript
-await client.sendMessage(m.chat, {
-  image: { url: "./pouimg.jpg" },
-  text: "body",
-  title: "title", // required when sending media
-  footer: "footer",
-  interactiveButtons: [
-    {
-      name: "single_select",
-      buttonParamsJson: JSON.stringify({
-        title: "\0"
-      })
-    }
-  ],
-  messageParams: JSON.stringify({
-    bottom_sheet: {
-      /** other params **/
+  sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
+    if (connection === 'close') {
+      const code = lastDisconnect?.error?.output?.statusCode
+      if (code !== DisconnectReason.loggedOut) start()
+      else console.log('Sesi logout, hapus folder session lalu login ulang.')
+    } else if (connection === 'open') {
+      console.log('Terhubung!')
     }
   })
-});
+
+  return sock
+}
+
+start()
 ```
 
-## Send a member label
-```javascript
-await client.sendMessage(m.chat, {
-  groupLabel: {
-    labelText: "Tagged members appear here"
-  }
-});
+### Koneksi dengan QR Code
+
+```js
+const sock = makeWASocket({
+  auth: state,
+  printQRInTerminal: true
+})
 ```
 
-## Send a message to group members
-```javascript
-await client.sendMessageMembers(m.chat, {
-  extendedTextMessage: {
-    text: "Hello members"
+### Menerima dan Membalas Pesan
+
+```js
+sock.ev.on('messages.upsert', async ({ messages }) => {
+  const m = messages[0]
+  if (!m.message || m.key.fromMe) return
+
+  const teks = m.message.conversation || m.message.extendedTextMessage?.text || ''
+
+  if (teks === '.ping') {
+    await sock.sendMessage(m.key.remoteJid, { text: 'Pong!' }, { quoted: m })
   }
-}, {});
+})
 ```
 
-# Simple sendMessage Helpers
+### Mengirim Berbagai Jenis Pesan
 
-## Send text
-```javascript
-await client.sendText(m.chat, "Hello!", {
-  contextInfo: {
-    mentionedJid: [m.chat]
-  }
-}, {
-  key: {
-    remoteJid: "status@broadcast",
-    participant: m.sender,
-    fromMe: true
-  },
-  message: {
-    conversation: "\0"
-  }
-});
+```js
+const jid = '628xxxxxxxxxx@s.whatsapp.net'
+
+// Teks
+await sock.sendMessage(jid, { text: 'Halo!' })
+
+// Gambar
+await sock.sendMessage(jid, {
+  image: { url: './gambar.jpg' },
+  caption: 'Ini gambar'
+})
+
+// Video
+await sock.sendMessage(jid, {
+  video: { url: './video.mp4' },
+  caption: 'Ini video'
+})
+
+// Audio
+await sock.sendMessage(jid, {
+  audio: { url: './audio.mp3' },
+  mimetype: 'audio/mp4'
+})
+
+// Dokumen
+await sock.sendMessage(jid, {
+  document: { url: './file.pdf' },
+  mimetype: 'application/pdf',
+  fileName: 'file.pdf'
+})
 ```
 
-## Send image
-```javascript
-await client.sendImage(m.chat, { url: "./pouimg.jpg" }, "Caption", {
-  contextInfo: {
-    mentionedJid: [m.chat]
-  }
-}, {
-  key: {
-    remoteJid: "status@broadcast",
-    participant: m.sender,
-    fromMe: true
-  },
-  message: {
-    conversation: "\0"
-  }
-});
+### Grup
+
+```js
+// Info grup
+const meta = await sock.groupMetadata('1234567890@g.us')
+
+// Tambah / keluarkan anggota
+await sock.groupParticipantsUpdate('1234567890@g.us', [jid], 'add')
+await sock.groupParticipantsUpdate('1234567890@g.us', [jid], 'remove')
+
+// Jadikan / cabut admin
+await sock.groupParticipantsUpdate('1234567890@g.us', [jid], 'promote')
+await sock.groupParticipantsUpdate('1234567890@g.us', [jid], 'demote')
 ```
 
-## Send video
-```javascript
-await client.sendVideo(m.chat, { url: "./video.mp4" }, "Caption", {
-  contextInfo: {
-    mentionedJid: [m.chat]
-  }
-}, {
-  key: {
-    remoteJid: "status@broadcast",
-    participant: m.sender,
-    fromMe: true
-  },
-  message: {
-    conversation: "\0"
-  }
-});
+## Struktur Folder
+
+```
+baileys/
+├── lib/            # Source code library
+├── package.json
+└── README.md
 ```
 
-## Send audio
-```javascript
-await client.sendAudio(m.chat, { url: "./pouaudio.mp3" }, {
-  contextInfo: {
-    mentionedJid: [m.chat]
-  }
-}, {
-  key: {
-    remoteJid: "status@broadcast",
-    participant: m.sender,
-    fromMe: true
-  },
-  message: {
-    conversation: "\0"
-  }
-});
-```
+## Kontribusi
 
-## Send location
-```javascript
-await client.sendLocation(m.chat, "Caption", 90.0, 90.0, "https://example.com", "1234567890", {
-  contextInfo: {
-    mentionedJid: [m.chat]
-  }
-}, {
-  key: {
-    remoteJid: "status@broadcast",
-    participant: m.sender,
-    fromMe: true
-  },
-  message: {
-    conversation: "\0"
-  }
-});
-```
+Pull request dan laporan bug dipersilakan lewat [Issues](https://github.com/ikyerza/baileys/issues).
 
-## Send poll
-```javascript
-await client.sendPoll(m.chat, "Pick one", ["1", "2", "3"], true, {
-  contextInfo: {
-    mentionedJid: [m.chat]
-  }
-}, {
-  key: {
-    remoteJid: "status@broadcast",
-    participant: m.sender,
-    fromMe: true
-  },
-  message: {
-    conversation: "\0"
-  }
-});
-```
+## Kredit
 
-## Send quiz
-```javascript
-await client.sendQuiz(m.chat, "Quiz question", ["1", "2", "3"], "2", {
-  contextInfo: {
-    mentionedJid: [m.chat]
-  }
-}, {
-  key: {
-    remoteJid: "status@broadcast",
-    participant: m.sender,
-    fromMe: true
-  },
-  message: {
-    conversation: "\0"
-  }
-});
-```
+- [WhiskeySockets/Baileys](https://github.com/WhiskeySockets/Baileys) – library asli
+- Seluruh kontributor Baileys
 
-## Send status mention
-```javascript
-await client.statusMention(m.chat, {
-  extendedTextMessage: {
-    text: "Mentioned in status"
-  }
-});
-```
+## Lisensi
 
----
-
-# Credits
-
-ikyerza is a fork of [Baileys](https://github.com/WhiskeySockets/Baileys), originally created by
-[Adhiraj Singh](https://github.com/adiwajshing) and maintained by the WhiskeySockets community.
-All credit for the underlying protocol implementation goes to the original authors and contributors.
-See [LICENSE](LICENSE) for the full license text and copyright notices.
-
-# Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on reporting issues and submitting pull requests.
-
-# Disclaimer
-
-This is **not** an official WhatsApp product. Use of this library to send bulk or unsolicited messages
-may violate WhatsApp's Terms of Service and can result in your number being banned. Use responsibly.
+MIT. Lihat file `LICENSE` untuk detailnya.
